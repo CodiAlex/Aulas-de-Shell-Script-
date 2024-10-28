@@ -1,0 +1,556 @@
+
+Awk é usado para filtragem de strings ou como uma linguagem de programação.
+
+Fazer com que o awk imprima na tela o primeiro argumento do arquivo file.txt
+file.txt = "banana é quente"
+
+awk '{ print $1 }' test
+
+O awk vai imprimir na tela atravéz do comando print o primeiro argumento do arquivo test.
+R=banana 
+
+*Não precisa usar o operador -F para especificar o que vem antes e depois da string se oque demilita for o espaço.
+
+Fazer que o awk imprima na tela o primeiro argumento e o setimo argumento de um arquivo.
+
+Ex do arquivo /etc/passwd 
+
+root:x:0:0:root:/root:/bin/bash
+1    2 3 4  5     6     7  ...
+
+
+awk -F: '{ print $1 "=>" $7 }' /etc/passwd 
+
+
+O parâmetro -F é para especificar para o awk oque vem antes e depois da strings do arquivo.
+
+Os argumentos do awk segue a mesma lógica do próprio shell bash
+
+Por exemplo em um script
+#!/bin/bash
+echo $2  # Vai imprimir no stdout, ou seja na tela o segundo argumento.
+
+
+Seguindo a logica a linha do grupo root seria 1=root 7="/bin/bash", print vai imprimir na tela assim (root=>/bin/bash) 
+
+Executar um comando antes do processamento do awk.
+awk 'BEGIN { print "Titulo" }'
+
+Fazer com que o awk execute um comando no inicio do processo e no final do processo.
+
+awk -F: '
+   BEGIN { print "Antes do processo do awk" } # Comando inicial
+    { 
+       {print $1 "--" $7} #Processo que é executado linha por linha do arquivo.
+    }
+  END { print "Após o processo do awk" }' /etc/passwd
+ # ^ Comando final
+
+
+BEGIN executa um comando antes do processo do awk 
+END executa um comando após o processo do awk
+
+Usa-se aspas para especificar onde começa a sintaxe até onde termina.
+sintaxe=Estrutura do comando.
+
+O awk só vai imprimir no stdout uma mensagem se a condição for verdadeira.
+
+echo 123,600 | awk -F, '$1 != $2 { print "O primeiro argumento é diferente do segundo" }' 
+
+O comando print só vai imprimir na tela a mensagem "..." se a condição ($1 != $2) for verdadeira ou seja se o primeiro argumento for diferente do segundo argumento.
+
+Trocar um argumento especifico por outra string.
+
+file.txt: 
+chocolate é câncer
+chocolate é ruim
+
+awk '{ $3="bom" ; print $0 }' file.txt
+
+$3="bom" Diz ao awk que sempre o terceiro argumento vai ser igual a bom.
+
+; = Separa um comando do outro
+
+$0 Significa na linguagem do awk todos argumentos da linha. Portanto é por isso que o print imprimi na tela todos argumentos.
+
+* Não precisa usar o operador -F para especificar oque vem antes e depois na string porque por padrão o awk consegue detectar o espaço vazio. 
+
+Usar o awk para fazer leitura de arquivos.
+file.txt:
+banana
+
+awk '{ print $0 }' file.txt
+
+$0 Na linguagem do awk significa todos argumentos de todas linhas. 
+
+O awk vai imprimir na tela atrávez do comando print todos argumentos de todas linhas do arquivo file.txt.
+
+Pegar o comando do arquivo e transferir para o awk.
+
+Pode-se colocar o comando do awk dentro de um arquivo de texto e transferir o comando para o awk através do parâmetro -f 
+
+file.txt: 
+chocolate banana hoje 
+
+comando.txt 
+{ print $1 "=>" $2 } 
+
+awk -f comando.txt file.txt
+
+Transferir a sintaxe do arquivo comando.txt para modificar o stdout do arquivo file.txt.
+
+R=chocolate=>banana
+
+* Não precisa usar o operador -F para especificar o que vem antes e depois da string porque por padrão o awk consegue detectar o espaço vazio.
+
+Criar variável para o awk 
+
+{
+text=$1 "=>" $3 #Exportar variável
+
+print text # Print vai imprimir o resultado da variável test
+}
+
+Pode-se usar isso dentro do arquivo e usar o parâmetro -f do awk para puxar a sintaxe do arquivo.
+
+sintaxe=Estrutura do comando
+
+Imprimir na tela uma mensagem e logo após fazer um processamento de um arquivo.
+file.txt:
+abacate 
+
+awk 'BEGIN {print "Titulo" } {print $0 }' file.txt 
+R= "Titulo 
+   abacate"
+
+BEGIN é um comando do awk e foi projetado para executar um comando inicialmente 
+
+Portanto o BEGIN vai executar o comando print que vai imprimir na tela a mensagem "Titulo", logo em seguida vem o print com $0. A variável $0 significa todos argumentos de todas linhas portanto o print vai imprimir na tela todas linhas.
+
+A usar variável em vez do -F
+
+A variável FS tem a mesma função do operador -F que é especificar oque vem antes e depois da string.
+
+Em um script da linguagem awk deve-se usar FS e não o -F porque não faz parte da linguagem do awk. 
+
+Fazer uma tabela usando awk
+
+file.txt:
+banana:chocolate
+
+BEGIN   {               #BEGIN vai executar comando antes do processo do awk
+   print "-----------||-----------"  #imprimir na tela
+  FS=":"   # A variável FS é para determinar oque vem antes e depois das strings
+}
+
+    { 
+      {print $1 "   --||-- " $2} #Processo do awk
+    }
+
+ END {                     #Executa comando após o processo do awk
+   print "Concluido processo do awk"
+}       
+
+
+Na função de BEGIN vai ser executado inicialmente o comando print que vai imprimir na tela caracteres, logo em seguida determina a variável FS para especificar oque vem antes e depois das strings. O processo do awk que vai imprimir na tela o primeiro argumento, logo em seguida imprimir caracteres que separa do segundo argumento. END executa o comando print após o processamento do awk.
+
+*A variável FS tem que ser definida antes do processo do awk, segue a mesma lógica de uma linha de comando: awk -F(caractere que separa as strings) {print ...}
+
+
+Agora pode colocar o código do awk em um arquivo de texto e usar o seguinte comando "awk -f script.txt file.txt" . Usa-se o parâmetro -f para especificar o arquivo de entrada cujo tem códigos que o interpretador usará para modificar o stdout de um arquivo.
+
+
+Resolver o problema da primeira linha de FS (Serve para outras variáveis também)
+
+echo -e "A:B:C:D\nA:B" | awk '{FS=":"} {print $1,$2} #Processo do awk'
+
+R=
+A:B:C:D
+A B
+
+*As vezes o processo do awk é executado primeiro antes da variável ser exportada por isso que na primeira linha não teve efeito, mas para resolver isso precisa usar o BEGIN antes do '{FS=":"}' para ser exportada a variável antes do processo do awk. Para se previnir disso é bom sempre usar antes da variável BEGIN.
+
+echo -e "A:B:C:D\nA:B" | awk 'BEGIN{FS=":"} {print $1,$2} #Processo do awk'
+
+R=
+A B
+A B
+
+*Inicializa a variável. Processo do awk é o que consiste em imprimir na tela os argumentos e é executado linha por linha do arquivo de entrada.
+
+OFS no awk 
+
+A variável OFS especifica o caractere que  vai separar os argumentos.
+
+Por padrão a variável OFS é o caractere vazio.
+
+awk -F: '{print $1,$2}' /etc/passwd
+
+A virgula que separa os argumentos faz referência a variável OFS.
+
+Mudando o valor da variável OFS podemos definir de forma personalizada oque vai separar os argumentos.
+
+awk -F: '{OFS="^" } {print $1,$2}' /etc/passwd
+
+R=
+root^x
+     ...
+
+FIELDWIDTHS no awk 
+
+A variável FIELDWIDTHS filtra a separação sequencial de caractere/digito que vai ser passado para o argumento.
+
+A proposta vai ser separar os digitos e em especifico o digito que tiver ligado a outro atravéz de um simbolo.
+
+Em file.txt:
+12.68
+24-78
+35%88
+
+12345 Como pode ser visto são 5 colunas.
+
+Seguindo a ideia da proposta o digito que tiver sendo ligado com o simbolo é separao, portanto segunda coluna com terceira coluna e a quarta coluna Ex:2.6 
+
+awk 'BEGIN{FIELDWIDTHS="1 3 1"}{print $1,$2,$3} #Processo do awk' file.txt
+R=
+1 2.6 8
+2 4-7 8
+3 5%8 8
+
+*A virgula usada entre os argumentos faz referência ao OFS que por padrão é caractere vazio.
+
+* Como explicado anteriomente BEGIN executa o comando antes do processamento do awk, precisa usar já que o awk executa as vezes dependendo do tipo de variável o processo do awk primeiro antes da variável ser exportada e caso não tenha BEGIN na primeira vez que o processo é executado cujo é a primeira linha do arquivo de entrada a variável FIELD ainda não foi definida portanto as colunas não são passadas para o argumento.
+
+RS no awk
+
+A variável RS é um separador de registo que equivale ao significado de separador de conjutos.
+
+Em file.txt 
+chocolate
+biscoito
+ #CONJUNTO1
+---
+ #CONJUNTO2
+Ferro 
+Bronze
+
+
+Imprimir na tela a primeira linha do CONJUNTO1
+
+awk -F"\n" 'BEGIN{RS="--- "}{print $1}' file.txt 
+
+R=
+chocolate
+
+* O parâmetro -F é para especificar oque separa as strings de um arquivo, que neste caso cada string estão em linhas separadas e em regex nova linha representa "\n"
+
+Mostrar conjunto inteiro pelo argumento.
+
+awk 'BEGIN{FS="\n---" ; RS="--- "}{print $2}' file.txt 
+
+*Usa a variável FS para o mesmo próposito do parâmetro -F que é especificar oque separa as strings de um arquivo. As strings são separadas por linhas =\n e támbem pelo ---. A variável RS é --- já que é o que separa os conjuntos.
+
+R=
+ #CONJUNTO2
+Ferro 
+Bronze
+
+Fazer leitura de variável do shell usando awk.
+
+awk 'BEGIN{print ENVIRON["USER"]}'
+
+*ENVIRON faz a função de capturar o valor da variável do shell
+
+Pode usar também o parâmetro -v para fazer o awk interpretar variáveis do shell 
+
+awk -v record=demo 'BEGIN{print record}'
+R=
+demo
+
+*Tem que usar BEGIN para executar o comando print inicialmente já que para isso  não precisa de um arquivo para processar.
+
+NF no awk
+
+A variável NF é para detectar o ultimo argumento de cada linha do arquivo.
+
+*O processo do awk que é quando imprimi os argumentos é feito linha a linha do arquivo.
+
+file.txt
+abacate:jos:kos:laço
+
+awk -F":" '{print $1,$NF}' file.txt 
+R=abacate laço
+
+*Precisa ter $ antes da variável NF para mostrar a string que faz referência ao  ultimo argumento, mas se não colocar $ apresentará o número do ultimo argumento. 
+
+FNR no awk 
+
+A variável FNR determina o número da linha do argumento imprimido.
+
+file.txt
+banana:pessêgo
+abacate:limão
+
+awk -F":" '{print $1,FNR}' file.txt 
+R=
+banana 1
+abacate 2
+
+banana primeiro argumento da primeira linha, abacate primeiro argumento da segunda linha.
+
+*Processo do awk imprimi o argumento e é feito de linha em linha do arquivo.
+
+*Quando print imprimir o argumento FNR diz em que linha está.
+
+Também funciona com dois arquivos 
+
+file2.txt
+ga:go
+gi:go
+
+awk -F":" '{print $1,FNR}' file.txt file2.txt 
+
+R=
+banana 1
+abacate 2
+ga 1
+gi 2
+
+NR no awk
+
+*Fornece o número total de registros 
+
+A variável NR mostra a quantidade de linhas processadas do arquivo.
+
+*Processo do awk é feito linha por linha do arquivo.
+
+file.txt
+Predio
+Casa
+
+awk '{print NR}' file.txt
+R=
+1
+2
+
+file2.txt
+Banana
+Sabão
+
+awk '{print NR}' file.txt file2.txt
+1
+2
+3
+4
+
+* Ocorreu 4 processos já que são 4 linhas.
+
+Definir variável no script do awk
+
+BEGIN {
+  vari="banana"
+ print vari
+} 
+
+
+*Como não tem nenhum arquivo de entrada para ser processado tem que usar BEGIN para ser executado apenas uma vez inicialmente.
+
+Especificadores de formato do printf que pode ser usado no awk.
+
+%d É um operador para o printf identificar somente números inteiros.
+
+Imprimir uma mensagem referente ao argumento de número inteiro.
+
+printf "Número inteiro:%d Segundo Número inteiro:%d\n" 1 
+R=
+Número inteiro:1 Segundo Número inteiro:0
+
+*Se o argumento for um número inteiro o print não apresenta erro.
+
+*O primeiro %d faz referência ao primeiro argumento de número inteiro e o segundo %d faz referência ao segundo argumento de número inteiro.
+
+printf "%d\n" 1 5 
+R=
+1
+5
+
+O printf imprimi os argumentos como pode ser visto em linhas separadas quando só especificado só o primeiro argumento ou seja somente um %d.
+
+*\n em regex significa nova linha.
+
+%f É um operador que faz o printf converter o número do argumento em número de ponto flutuante.
+
+printf "%f\n" 8
+R=
+8,000000
+
+printf "ARG1 transformado em ponto flutuante:%f\nARG2 tranformado em ponto flutuante:%f\n" 1 2
+R=
+ARG1 transformado em ponto flutuante:1,000000
+ARG2 tranformado em ponto flutuante:2,000000
+
+* O printf com %f transforma o número do argumento em decimal. O ponto flutuante pode ter um valor diferente dependendo da linguagem programação.
+
+%g É um operador que diz ao printf tirar os digitos que não muda o valor.
+
+printf "%g\n" 00,1
+R
+0,1
+
+Foi removido o primeiro 0 já que não muda o valor do argumento.
+
+%s É um operador que diz ao printf para imprimir todos argumentos
+
+A=B
+printf "%s\n"  $A
+R=
+B
+
+*Lembre-se que para imprimir todos argumentos em uma linha só usa " ".
+
+Colocar caracteres vazio atrás da string.
+
+Depois da porcentagem pode-se botar um número para especificar a quantidade de caractere vazio seguindo (%valor-quantidade de caractere) atrás da string.
+
+
+*A largura de caracteres vazio depende da quantidade de caracteres da string.
+
+
+printf "%8s\n" "12345678" "as"
+
+R=
+12345678
+      as
+
+
+a s
+1 2
+(%8-2)=6 caracteres vazio.
+
+Entre outros operadores.
+
+Exemplos da junção de printf e awk
+
+No arquivo /etc/passwd tem o $4 argumento que em todas linhas apresentam número e a proposta é converter esses números em números de ponto flutuante.
+
+
+O operador que diz ao printf converter o número do argumento em número de ponto flutuante é %f.
+
+ awk -F":" '{printf "%f\n",$4}'  /etc/passwd
+R=
+0.000000
+...
+
+*A , faz parte da estrutura de comando do awk para especificar o argumento quando usado printf com awk.
+
+
+Agora converter todos $4 argumentos do arquivo /etc/passwd em número cientifico, para isso deve ser usado %e.
+
+%e Diz ao printf para converter o número do argumento em número cientifico.
+
+ awk -F":" '{printf "%e\n",$4}' /etc/passwd
+R=
+0.000000e+00
+
+Uma mensagem para o $1 argumento e o $6 argumento do arquivo /etc/passwd
+
+awk '
+   BEGIN {
+ FS=":"
+}
+
+  {
+    {printf "The user %s dir %s\n",$1,$6}
+
+ }' /etc/passwd
+
+%s é um operador que diz ao printf para imprimir na tela os argumentos.
+
+Primeiro %s = referência ao arg1 e o segundo %s = referência ao arg2.
+arg1=$1 
+arg2=$6 
+
+*A , no caso do printf mais o awk é usado para especificar argumentos.
+
+* Com print nesse caso ficaria mais simples:
+{print "The user",$1 "dir",$6}
+
+*A , faz referência a variável OFS que por padrão é caractere vazio.
+
+String função do awk
+
+Para transformar caracteres minusculos em maiusculos usa-se a função topper.
+
+*A estrutua do comando como citada em "man awk" é toupper(str) 
+
+awk -v arg=banana 'BEGIN{print toupper(arg)}'
+R=
+BANANA
+
+Através do parâmetro -v o awk consegue interpretar variáveis do shell.
+
+* Precisa de BEGIN para especificar que isso não é um processo do awk que é executado linha por linha do arquivo e sim algo que só é executado uma vez.
+
+file.txt
+choca bêbê 
+banana gostusam
+chocolate amanteigado
+
+awk -F" " '{print toupper($2)}' file.txt
+R=
+BÊBÊ
+GOSTUSAM
+AMANTEIGADO
+
+
+* A função toupper irá converter o segundo argumento de cada linha do arquivo file.txt em maiusculo.
+
+awk 'BEGIN{print toupper("torrada")}'
+R=
+TORRADA
+
+* A função das " " é dizer para a função toupper que a string não é uma variável.
+
+Localizar string usando awk.
+
+awk '/root/{print $0}' /etc/passwd
+
+O awk vai localizar a string que tiver dentro de / /.
+
+O print imprimirá oque a variável diz que é todos argumentos de todas linhas.
+
+Localizar argumento em especifico.
+
+Em file.txt
+banana banana-doce
+banana banana-preta
+
+O primeiro arg e o segundo arg apresentam a string banana, mas na proposta deve localizar só o segundo argumento.
+
+awk '/banana/{print $2}' file.txt 
+R=
+banana-doce
+banana-preta
+
+*awk vai imprimir o segundo argumento com uma condição se achar a string banana no arquivo file.txt.
+
+Calcular raiz quadrada no awk
+
+awk 'BEGIN{print sqrt(9)}'
+R=
+3
+
+
+*BEGIN para executar somente uma vez o comando print enquanto o processo do awk é feito linha por linha no arquivo.
+
+A função sqrt diz para o print imprimir na tela o valor da  raiz quadrada.
+
+Utilizar em script
+
+Arg=$1
+
+awk -v Arg=$Arg 'BEGIN{print sqrt(Arg)}'
+
+Através do operador -v o awk consegue interpretar variáveis do shell
+
+*O número da raiz quadrada é o valor do primeiro argumento.

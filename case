@@ -1,0 +1,8 @@
+case $1 in   
+ a) 
+  echo oi
+ ;; 
+ b) 
+  echo olá
+ ;; 
+esac 
